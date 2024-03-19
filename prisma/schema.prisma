@@ -1,0 +1,58 @@
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  nacionalidad String
+  cedula       String   @unique
+  password     String
+  nombre       String
+  apellido     String
+  role         Int      @default(1) // 1 = votante, 2 = admin
+  votes       Vote[]
+}
+
+model Election {
+  id           Int           @id @default(autoincrement())
+  title        String
+  description  String?
+  startDate    DateTime
+  endDate      DateTime
+  active       Boolean        @default(false)
+  candidates   Candidate[]
+}
+
+
+model Candidate {
+  id          Int        @id @default(autoincrement())
+  name        String
+  party       String?
+  image       String?
+  election    Election   @relation(fields: [electionId], references: [id])
+  electionId  Int
+
+  // Relación inversa con el modelo Vote
+  votes       Vote[]     @relation("votes")
+}
+
+
+model Vote {
+  id          Int       @id @default(autoincrement())
+  userId      Int       // ID del usuario que emitió el voto
+  candidateId Int      // ID del candidato seleccionado
+  createdAt   DateTime  @default(now())  // Fecha y hora en que se emitió el voto
+
+  // Relaciones
+  user        User      @relation(fields: [userId], references: [id])
+  candidate   Candidate @relation("votes", fields: [candidateId], references: [id])
+
+  // Relación inversa en el modelo Candidate
+  @@index([userId], name: "user_id_index")
+}
+

@@ -22,4 +22,12 @@ router.post("/admin", authMiddleware([2]), async (req, res, next) => {
     }
   });
 
+  router.post("/check", authMiddleware([1,2]), async (req, res, next) => {
+    try {
+        res.status(200).json({ message: "ok" });
+    } catch (error) {
+        res.status(404).json({ message: "Not found" });
+    }
+  });
+
 export default router;

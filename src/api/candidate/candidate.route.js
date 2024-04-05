@@ -5,9 +5,10 @@ import authMiddleware from '../../middleware/authMiddleware.js';
 const router = Router();
 
 // Ruta para crear un candidato
-router.post("/create", authMiddleware([2]), async (req, res, next) => {
+router.post("/create", /*authMiddleware([2]),*/ async (req, res, next) => {
   try {
     const { name, party, image, electionId } = req.body;
+    console.log(req.body);
 
     if (!name || !electionId) {
       return res.status(400).json({ error: "Se requieren el nombre del candidato y el ID de la elección" });

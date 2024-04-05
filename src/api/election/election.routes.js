@@ -47,7 +47,6 @@ router.put("/:electionId", authMiddleware([2]), async (req, res, next) => {
     const { electionId } = req.params;
     const { title, description, startDate, endDate } = req.body;
 
-    // Validar que se proporcionen todos los campos necesarios
     if (!title || !startDate || !endDate) {
       return res.status(400).json({ error: "Se requieren todos los campos" });
     }
@@ -72,7 +71,11 @@ router.get("/", authMiddleware([1, 2]), async (req, res, next) => {
     // Obtener todas las elecciones de la base de datos
     const elections = await prisma.election.findMany({
       include: {
-        candidates: true,
+        votes: {
+          select: {
+            userCedula: true,
+          },
+        },
       },
     });
 
@@ -83,5 +86,25 @@ router.get("/", authMiddleware([1, 2]), async (req, res, next) => {
     next(error);
   }
 });
+
+router.get(
+  "/:electionId",
+  /*authMiddleware([1, 2]),*/ async (req, res, next) => {
+    try {
+      let electionId = parseInt(req.params.electionId);
+
+      const elections = await prisma.election.findUnique({
+        where: { id: electionId },
+        include: {
+          candidates: true,
+        },
+      });
+
+      res.status(200).json(elections);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
 
 export default router;

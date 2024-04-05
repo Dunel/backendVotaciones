@@ -4,7 +4,7 @@ const authMiddleware = (allowedRoles) => {
   return (req, res, next) => {
     const token =
       req.headers.authorization && req.headers.authorization.split(" ")[1];
-      console.log(token);
+      //console.log(token);
     if (!token) {
       return res.status(401).json({ error: "Acceso no autorizado" });
     }

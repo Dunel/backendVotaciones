@@ -6,26 +6,33 @@ import { prisma } from "../../db.js";
 const router = Router();
 
 router.post("/", async (req, res, next) => {
-  const { cedula, password } = req.body;
-  console.log(req.body);
-
   try {
-    if (!cedula) {
-      return res.status(400).json({ error: "Se requiere el campo cedula" });
+    const { cedula, password, nacionalidad } = req.body;
+    console.log(req.body);
+
+    if (!cedula || !password || !nacionalidad) {
+      return res.status(400).json({ message: "Se requiere el campo cedula" });
     }
 
     const existingUser = await prisma.user.findUnique({
-      where: { cedula: cedula },
+      where: {
+        cedula: parseInt(cedula),
+        nacionalidad,
+      },
     });
 
     if (!existingUser) {
-      return res.status(401).json({ error: "Cédula o contraseña incorrecta" });
+      return res
+        .status(401)
+        .json({ message: "Cédula o contraseña incorrecta" });
     }
 
     const passwordMatch = await bcrypt.compare(password, existingUser.password);
 
     if (!passwordMatch) {
-      return res.status(401).json({ error: "Cédula o contraseña incorrecta" });
+      return res
+        .status(401)
+        .json({ message: "Cédula o contraseña incorrecta" });
     }
 
     const { role } = existingUser;
@@ -41,9 +48,16 @@ router.post("/", async (req, res, next) => {
       { expiresIn: "1h" }
     );
 
-    res.json({ token });
+    res.json({
+      token,
+      cedula,
+      nombre: existingUser.nombre,
+      apellido: existingUser.apellido,
+      role: role,
+    });
   } catch (error) {
-    next(error);
+    console.error(error);
+    return res.status(500).json({ message: "Error en el servicio." });
   }
 });
 

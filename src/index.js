@@ -15,6 +15,7 @@ app.use(
     origin: (origin, callback) => {
       const ACCEPTED_ORIGINS = [
         "https://node.appcorezulia.lat",
+        "https://node.appcorezulia.lat:30000"
       ];
       if (ACCEPTED_ORIGINS.includes(origin)) {
         return callback(null, true);

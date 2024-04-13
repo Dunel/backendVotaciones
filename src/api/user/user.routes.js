@@ -5,7 +5,7 @@ import authMiddleware from "../../middleware/authMiddleware.js";
 
 const router = Router();
 
-router.get("/", authMiddleware([2]), async (req, res, next) => {
+router.get("/", authMiddleware([2]*/), async (req, res, next) => {
   try {
     const users = await prisma.user.findMany();
     res.json(users);

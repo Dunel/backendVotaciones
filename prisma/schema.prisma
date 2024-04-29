@@ -4,18 +4,28 @@ datasource db {
 }
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-1.0.x"]
 }
 
 model User {
-  id           Int    @id @default(autoincrement())
+  id           Int      @id @default(autoincrement())
   nacionalidad String
-  cedula       Int @unique
+  cedula       Int      @unique
   password     String
-  nombre       String
-  apellido     String
-  role         Int    @default(1) // 1 = votante, 2 = admin
-  votes        Vote[]
+  fullname     String
+  birthdate    DateTime
+  estadoId     Int
+  municipioId  Int
+  parroquiaId  Int
+  question     String
+  answer       String
+  role         Int      @default(1) // 1 = votante, 2 = admin
+
+  estado    Estado    @relation(fields: [estadoId], references: [id])
+  municipio Municipio @relation(fields: [municipioId], references: [id])
+  parroquia Parroquia @relation(fields: [parroquiaId], references: [id])
+  votes     Vote[]
 }
 
 model Election {
@@ -26,7 +36,7 @@ model Election {
   endDate     DateTime
   active      Boolean     @default(false)
   candidates  Candidate[]
-  votes Vote[] @relation("votes_elec")
+  votes       Vote[]      @relation("votes_elec")
 }
 
 model Candidate {
@@ -44,17 +54,40 @@ model Candidate {
 
 model Vote {
   id          Int      @id @default(autoincrement())
-  userCedula  Int      // ID del usuario que emitió el voto
-  candidateId Int?     // ID del candidato seleccionado (opcional)
-  electionId  Int      // ID de la elección
+  userCedula  Int // ID del usuario que emitió el voto
+  candidateId Int? // ID del candidato seleccionado (opcional)
+  electionId  Int // ID de la elección
   createdAt   DateTime @default(now()) // Fecha y hora en que se emitió el voto
 
   // Relaciones
-  user      User      @relation(fields: [userCedula], references: [cedula])
+  user      User       @relation(fields: [userCedula], references: [cedula])
   candidate Candidate? @relation("votes", fields: [candidateId], references: [id]) // Relación opcional con el candidato
-  election  Election  @relation("votes_elec", fields: [electionId], references: [id])
+  election  Election   @relation("votes_elec", fields: [electionId], references: [id])
 
   // Relación inversa en el modelo Candidate
   @@index([userCedula], name: "user_id_index")
 }
 
+model Estado {
+  id         Int         @id @default(autoincrement())
+  estado     String
+  municipios Municipio[]
+  User       User[]
+}
+
+model Municipio {
+  id         Int         @id @default(autoincrement())
+  estado     Estado      @relation(fields: [estadoId], references: [id])
+  estadoId   Int
+  municipio  String
+  parroquias Parroquia[]
+  User       User[]
+}
+
+model Parroquia {
+  id          Int       @id @default(autoincrement())
+  municipio   Municipio @relation(fields: [municipioId], references: [id])
+  municipioId Int
+  parroquia   String
+  User        User[]
+}

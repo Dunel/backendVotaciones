@@ -13,7 +13,7 @@ const authMiddleware = (allowedRoles) => {
       const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
 
       if (!allowedRoles.includes(decodedToken.role)) {
-        return res.status(403).json({ error: "Permiso denegado" });
+        return res.status(401).json({ error: "Permiso denegado" });
       }
 
       req.user = decodedToken;

@@ -1,6 +1,8 @@
 import { z } from "zod";
 
-export const loginSchema = z.object({
+const questionRegex = /^[a-zA-Z\s]+$/;
+
+export const dateSchema = z.object({
   nacionalidad: z.enum(["V", "E"], {
     errorMap: (issue, ctx) => {
       return { message: "Por favor, seleccione una nacionalidad valida." };
@@ -25,7 +27,30 @@ export const loginSchema = z.object({
       return parsed;
     })
     ),
+});
+
+export const loginSchema = dateSchema.extend({
   password: z
     .string({ required_error: "La contraseña es requerida." })
     .min(8, { message: "La contraseña debe tener minimo 8 caracteres." }),
+})
+
+
+export const securitySchema = z.object({
+  question: z.enum(["question1", "question2", "question3"], {
+    errorMap: (issue, ctx) => {
+      return { message: "Por favor, seleccione una pregunta valida." };
+    },
+  }),
+  answer: z
+    .string({ required_error: "Se requiere la respuesta de la pregunta de seguridad." })
+    .min(3)
+    .max(50)
+    .regex(questionRegex)
+    .transform((val, ctx) => {
+      const answer = val.toLowerCase();
+      return answer;
+    }),
 });
+
+export const recoverySchema = securitySchema.merge(dateSchema)

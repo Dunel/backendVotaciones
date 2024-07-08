@@ -23,9 +23,28 @@ export const electionSchema = z.object({
       },
     })
     .datetime({ offset: true }),
-    active: z.boolean({
-      invalid_type_error: "Formato para activación no valido.",
-    }),
+  active: z.enum(["active", "inactive"], {
+    errorMap: (issue, ctx) => {
+      return { message: "Por favor, seleccione una activación valida." };
+    },
+  }).optional(),
+  type: z.enum(["pais", "estado", "municipio", "parroquia"], {
+    errorMap: (issue, ctx) => {
+      return { message: "Por favor, seleccione un lugar valido." };
+    },
+  }),
+  typeId: z
+    .number({
+      required_error: "Se requiere el id de la residencia.",
+      invalid_type_error: "Solo se permiten números en el campo.",
+    })
+    .min(0)
+    .max(1500),
+    roleElection : z.enum(["normal", "especial"], {
+      errorMap: (issue, ctx) => {
+        return { message: "Por favor, seleccione un tipo de elección valido." };
+      },
+    })
 });
 
 export const elecIdSchema = z.object({

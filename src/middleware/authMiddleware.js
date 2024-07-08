@@ -17,9 +17,11 @@ const authMiddleware = (allowedRoles) => {
       }
 
       req.user = decodedToken;
+      req.token = token;
 
       next();
     } catch (error) {
+      console.error(error);
       return res.status(401).json({ error: "Token inválido" });
     }
   };

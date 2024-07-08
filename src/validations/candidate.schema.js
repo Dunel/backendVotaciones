@@ -5,26 +5,17 @@ export const candidateSchema = z.object({
     .string({ required_error: "El nombre del candidato es requerido." })
     .min(3, { message: "El nombre debe tener minimo 3 caracteres." })
     .max(50, { message: "El nombre debe tener maximo 50 caracteres." }),
-  party: z
-    .string()
-    .min(3, { message: "El partido debe tener minimo 3 caracteres." })
-    .max(50, { message: "El partido debe tener maximo 50 caracteres." })
-    .optional(),
-  partyImage: z
-    .string()
-    .url({ message: "URL no valida." })
-    .min(10)
-    .max(150)
-    .optional(),
   image: z
-    .string()
-    .url({ message: "URL no valida." })
-    .min(10)
+    .string({ invalid_type_error: "Requiere string" })
     .max(150)
     .optional(),
-  electionId: z.number({
-    required_error: "La eleccion es requerida para el registro del candidato.",
-  }).min(1).max(99999999),
+  electionId: z
+    .number({
+      required_error:
+        "La eleccion es requerida para el registro del candidato.",
+    })
+    .min(1)
+    .max(99999999),
 });
 
 export const fullCandidateSchema = candidateSchema.extend({
@@ -32,7 +23,9 @@ export const fullCandidateSchema = candidateSchema.extend({
     .number({ required_error: "Se requiere el Candidato." })
     .min(1)
     .max(99999999)
-    .or(z.string()
+    .or(
+      z
+        .string()
         .min(1)
         .max(11)
         .transform((val, ctx) => {

@@ -3,8 +3,6 @@ import { z } from "zod";
 const passwordRegex =
   /^(?=.*[A-Z])(?=.*\d)(?=.*[@#$%&*./=\\])[A-Za-z\d@#$%&*./=\\]+$/;
 
-const questionRegex = /^[a-zA-Z\s]+$/;
-
 export const userSchema = z.object({
   /*id: z.number().optional(),*/
   /*role: z.number(),*/
@@ -15,6 +13,7 @@ export const userSchema = z.object({
   }),
   cedula: z
     .string({ required_error: "La cedula es requerida." })
+    .min(1)
     .max(18, { message: "La cedula debe tener maximo 18 caracteres." })
     .transform((val, ctx) => {
       const parsed = parseInt(val);
@@ -26,7 +25,7 @@ export const userSchema = z.object({
         return z.NEVER;
       }
       return parsed;
-    }),
+    }).or(z.number().min(1).max(999999999)),
   password: z
     .string({ required_error: "La contraseña es requerida." })
     .min(8, { message: "La contraseña debe tener minimo 8 caracteres." })
@@ -65,9 +64,8 @@ export const userSchema = z.object({
   }),
   answer: z
     .string({ required_error: "Se requiere la respuesta a la pregunta." })
-    .min(3)
+    .min(4)
     .max(50)
-    .regex(questionRegex)
     .transform((val, ctx) => {
       const answer = val.toLowerCase();
       return answer;

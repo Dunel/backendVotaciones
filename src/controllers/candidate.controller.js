@@ -8,23 +8,37 @@ import { ZodError } from "zod";
 export const createCandidate = async (req, res) => {
   try {
     const result = candidateSchema.safeParse(req.body);
-    console.log(result);
+    //console.log(result);
     if (!result.success) {
       return res
         .status(400)
         .json(result.error.issues.map((err) => err.message));
     }
-    const { name, party, partyImage, image, electionId } = result.data;
+    const { name, image, electionId } = result.data;
 
     const newCandidate = await prisma.candidate.create({
       data: {
         name,
-        party,
-        partyImage,
         image,
         electionId,
       },
     });
+
+    const countsCandidate = await prisma.candidate.count({
+      where: {
+        electionId: electionId,
+      },
+    });
+    if (countsCandidate == 2) {
+      const electionActive = await prisma.election.update({
+        where: {
+          id: electionId,
+        },
+        data: {
+          active: "active",
+        },
+      });
+    }
 
     return res.status(201).json(newCandidate);
   } catch (error) {
@@ -59,7 +73,7 @@ export const updateCandidate = async (req, res) => {
         .status(400)
         .json(result.error.issues.map((err) => err.message));
     }
-    const { name, party, partyImage, image, id, electionId } = result.data;
+    const { name, image, id, electionId } = result.data;
 
     const candidate = await prisma.candidate.findFirst({
       where: {
@@ -87,8 +101,6 @@ export const updateCandidate = async (req, res) => {
       where: { id },
       data: {
         name,
-        party,
-        partyImage,
         image,
         electionId,
       },
@@ -106,8 +118,8 @@ export const updateCandidate = async (req, res) => {
 
 export const deleteCandidate = async (req, res) => {
   try {
-    const result = fullCandidateSchema.shape.id.safeParse(req.body.id);
-    console.log(result);
+    const result = fullCandidateSchema.shape.id.safeParse(req.params.id);
+    //console.log(result);
     if (!result.success) {
       return res
         .status(400)
@@ -132,9 +144,25 @@ export const deleteCandidate = async (req, res) => {
       where: { id },
     });
 
+    const countsCandidate = await prisma.candidate.count({
+      where: {
+        electionId: candidate.electionId,
+      },
+    });
+    if (countsCandidate == 1) {
+      const electionActive = await prisma.election.update({
+        where: {
+          id: candidate.electionId,
+        },
+        data: {
+          active: "inactive",
+        },
+      });
+    }
+
     return res
       .status(200)
-      .json({ message: "El candidato ha sido eliminado correctamente." });
+      .json({ message: "La opción ha sido eliminado correctamente." });
   } catch (error) {
     if (error instanceof ZodError) {
       return res.status(400).json(error.issues.map((err) => err.message));

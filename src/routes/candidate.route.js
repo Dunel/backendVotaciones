@@ -16,7 +16,7 @@ router.get("/", authMiddleware([2]), getAllCandidates);
 
 router.put("/", authMiddleware([2]), updateCandidate);
 
-router.delete("/", authMiddleware([2]), deleteCandidate);
+router.delete("/:id", authMiddleware([2]), deleteCandidate);
 
 router.get("/:id", authMiddleware([2]), getCandidate);
 

@@ -9,43 +9,65 @@ generator client {
 }
 
 model User {
-  id           Int      @id @default(autoincrement())
-  nacionalidad String
-  cedula       Int      @unique
-  password     String
-  fullname     String
-  birthdate    DateTime
-  estadoId     Int
-  municipioId  Int
-  parroquiaId  Int
-  question     String
-  answer       String
-  role         Int      @default(1) // 1 = votante, 2 = admin
+  id              Int      @id @default(autoincrement())
+  nacionalidad    String
+  cedula          Int      @unique
+  password        String
+  fullname        String
+  birthdate       DateTime
+  estadoId        Int
+  municipioId     Int
+  parroquiaId     Int
+  question        String
+  answer          String
+  role            Int      @default(1) // 1 = votante, 2 = admin
+  tokenRecovery   String   @default("")
+  updatedAt       DateTime @updatedAt
+  passwordUpdated DateTime @default(now())
 
   estado    Estado    @relation(fields: [estadoId], references: [id])
   municipio Municipio @relation(fields: [municipioId], references: [id])
   parroquia Parroquia @relation(fields: [parroquiaId], references: [id])
   votes     Vote[]
+  logs      Log[]
+}
+
+enum Active {
+  active
+  inactive
+}
+
+enum RoleElection {
+  normal
+  especial
 }
 
 model Election {
-  id          Int         @id @default(autoincrement())
-  title       String
-  description String?
-  startDate   DateTime
-  endDate     DateTime
-  active      Boolean     @default(false)
-  candidates  Candidate[]
-  votes       Vote[]      @relation("votes_elec")
+  id           Int          @id @default(autoincrement())
+  title        String
+  description  String?
+  startDate    DateTime
+  endDate      DateTime
+  roleElection RoleElection @default(normal)
+  type         typeElec     @default(pais)
+  typeId       Int          @default(0)
+  active       Active       @default(inactive)
+  candidates   Candidate[]
+  votes        Vote[]       @relation("votes_elec")
+}
+
+enum typeElec {
+  pais
+  estado
+  municipio
+  parroquia
 }
 
 model Candidate {
   id         Int      @id @default(autoincrement())
   name       String
-  party      String?
-  partyImage String?
-  image      String?
-  election   Election @relation(fields: [electionId], references: [id])
+  image      String?  @default("")
+  election   Election @relation(fields: [electionId], references: [id], onDelete: Cascade)
   electionId Int
 
   // Relación inversa con el modelo Vote
@@ -60,9 +82,9 @@ model Vote {
   createdAt   DateTime @default(now()) // Fecha y hora en que se emitió el voto
 
   // Relaciones
-  user      User       @relation(fields: [userCedula], references: [cedula])
+  user      User       @relation(fields: [userCedula], references: [cedula], onDelete: Cascade)
   candidate Candidate? @relation("votes", fields: [candidateId], references: [id]) // Relación opcional con el candidato
-  election  Election   @relation("votes_elec", fields: [electionId], references: [id])
+  election  Election   @relation("votes_elec", fields: [electionId], references: [id], onDelete: Cascade)
 
   // Relación inversa en el modelo Candidate
   @@index([userCedula], name: "user_id_index")
@@ -90,4 +112,19 @@ model Parroquia {
   municipioId Int
   parroquia   String
   User        User[]
+}
+
+enum LogLevel {
+  INFO
+  WARN
+  ERROR
+}
+
+model Log {
+  id        Int      @id @default(autoincrement())
+  message   String
+  level     LogLevel @default(INFO)
+  createdAt DateTime @default(now())
+  userId    Int?
+  user      User?    @relation(fields: [userId], references: [cedula], onDelete: SetNull)
 }

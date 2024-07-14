@@ -113,7 +113,7 @@ export const getAllAdminElections = async (req, res) => {
   try {
     const elections = await prisma.election.findMany({
       include: {
-        votes: {
+        userVotes: {
           select: {
             userCedula: true,
           },
@@ -142,7 +142,7 @@ export const getHomeAdminElections = async (req, res) => {
         active: "active"
       },
       include: {
-        votes: {
+        userVotes: {
           select: {
             userCedula: true,
           },
@@ -222,7 +222,7 @@ export const getAllElections = async (req, res) => {
         },
       },
       include: {
-        votes: {
+        userVotes: {
           select: {
             userCedula: true,
           },

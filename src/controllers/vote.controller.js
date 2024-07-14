@@ -60,7 +60,7 @@ export const createVote = async (req, res) => {
       return res.status(400).json({ error: "El candidato no existe." });
     }
 
-    const existingVote = await prisma.vote.findFirst({
+    const existingVote = await prisma.userVote.findFirst({
       where: {
         userCedula,
         electionId,
@@ -74,9 +74,14 @@ export const createVote = async (req, res) => {
 
     const newVote = await prisma.vote.create({
       data: {
-        userCedula,
         candidateId,
         electionId,
+      },
+    });
+    const newVoter = await prisma.userVote.create({
+      data: {
+        userCedula,
+        electionId
       },
     });
 

@@ -28,7 +28,7 @@ model User {
   estado    Estado    @relation(fields: [estadoId], references: [id])
   municipio Municipio @relation(fields: [municipioId], references: [id])
   parroquia Parroquia @relation(fields: [parroquiaId], references: [id])
-  votes     Vote[]
+  votes     UserVote[]
   logs      Log[]
 }
 
@@ -54,6 +54,7 @@ model Election {
   active       Active       @default(inactive)
   candidates   Candidate[]
   votes        Vote[]       @relation("votes_elec")
+  userVotes    UserVote[]
 }
 
 enum typeElec {
@@ -76,18 +77,25 @@ model Candidate {
 
 model Vote {
   id          Int      @id @default(autoincrement())
-  userCedula  Int // ID del usuario que emitió el voto
   candidateId Int? // ID del candidato seleccionado (opcional)
   electionId  Int // ID de la elección
   createdAt   DateTime @default(now()) // Fecha y hora en que se emitió el voto
 
   // Relaciones
-  user      User       @relation(fields: [userCedula], references: [cedula], onDelete: Cascade)
   candidate Candidate? @relation("votes", fields: [candidateId], references: [id]) // Relación opcional con el candidato
   election  Election   @relation("votes_elec", fields: [electionId], references: [id], onDelete: Cascade)
+}
 
-  // Relación inversa en el modelo Candidate
-  @@index([userCedula], name: "user_id_index")
+model UserVote {
+  id         Int      @id @default(autoincrement())
+  userCedula Int
+  electionId Int
+  createdAt  DateTime @default(now())
+
+  // relaciones
+  user     User     @relation(fields: [userCedula], references: [cedula])
+  election Election @relation(fields: [electionId], references: [id])
+
 }
 
 model Estado {

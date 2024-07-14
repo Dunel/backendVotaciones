@@ -7,7 +7,6 @@ import voteRoutes from "./src/routes/vote.routes.js";
 import verifyRoutes from "./src/routes/verify-token.routes.js";
 import venezuelaRoutes from "./src/routes/venezuela.routes.js"
 import logsRoutes from "./src/routes/log.routes.js"
-import documentsRoutes from "./src/routes/documents.routes.js"
 import cors from "cors";
 
 const app = express();
@@ -63,7 +62,6 @@ app.use("/api/vote", voteRoutes);
 app.use("/api/verify-token", verifyRoutes);
 app.use("/api/venezuela", venezuelaRoutes);
 app.use("/api/logs", logsRoutes);
-app.use("/documents", documentsRoutes);
 
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
